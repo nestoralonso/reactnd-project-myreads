@@ -1,13 +1,17 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
 class BookItem extends Component {
+  static propTypes = {
+    onActionSelected: PropTypes.func.isRequired,
+  }
+
   componentWillReceiveProps(nextProps) {
     console.log('cwrp', nextProps.data)
   }
 
   getThumbnailStyle() {
     const { data: { imageLinks: { thumbnail } = {} } = {} } = this.props;
-    console.log('thumbnail', thumbnail);
     return {
       width: 128,
       height: 193,
@@ -15,9 +19,12 @@ class BookItem extends Component {
     }
   }
 
-  render() {
-    console.log('BookItem');
+  onActionSelected = (e) => {
+    if (!e || !e.target) return
+    this.props.onActionSelected(this.props.data, e.target.value)
+  }
 
+  render() {
     const { data } = this.props
 
     if (!data) return null
@@ -27,7 +34,7 @@ class BookItem extends Component {
         <div className="book-top">
           <div className="book-cover" style={this.getThumbnailStyle()}></div>
           <div className="book-shelf-changer">
-            <select>
+            <select onChange={this.onActionSelected}>
               <option value="none" disabled>Move to...</option>
               <option value="currentlyReading">Currently Reading</option>
               <option value="wantToRead">Want to Read</option>
@@ -37,7 +44,7 @@ class BookItem extends Component {
           </div>
         </div>
         <div className="book-title">{data.title}</div>
-        <div className="book-authors">{data.authors.length && data.authors[0]}</div>
+        <div className="book-authors">{data.authors && data.authors.length > 0 && data.authors[0]}</div>
       </div>
     );
   }
