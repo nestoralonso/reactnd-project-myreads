@@ -1,32 +1,38 @@
-import React, { Component } from 'react'
+import React, { Component } from "react"
 
-import * as BooksAPI from './BooksAPI'
-import BookItem from './BookItem'
+import * as BooksAPI from "./BooksAPI"
+import BookItem from "./BookItem"
 
 class SearchPage extends Component {
   state = {
     books: null,
-    query: '',
+    query: ""
   }
 
-  handleKeyPress = async (e) => {
-    if (e.key === 'Enter') {
+  handleKeyPress = async e => {
+    if (e.key === "Enter") {
       const query = this.refs.searchInput.value
       const books = await BooksAPI.search(query)
       this.setState({
-        books
+        books: books.map(b => {
+          b.shelf = "none"
+          return b
+        })
       })
     }
   }
 
   render() {
-    console.log('render');
-
     const { books } = this.state
     return (
       <div className="search-books">
         <div className="search-books-bar">
-          <a className="close-search" onClick={() => this.props.history.push('/')}>Close</a>
+          <a
+            className="close-search"
+            onClick={() => this.props.history.push("/")}
+          >
+            Close
+          </a>
           <div className="search-books-input-wrapper">
             {/*
             NOTES: The search from BooksAPI is limited to a particular set of search terms.
@@ -42,18 +48,19 @@ class SearchPage extends Component {
               placeholder="Search by title or author"
               onKeyPress={this.handleKeyPress}
             />
-
           </div>
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
-            {books && Array.isArray(books) && books.map(book => (
-              <BookItem
-                key={book.id}
-                data={book}
-                onActionSelected={this.props.onActionSelected}
-              />
-            ))}
+            {books &&
+              Array.isArray(books) &&
+              books.map(book => (
+                <BookItem
+                  key={book.id}
+                  data={book}
+                  onActionSelected={this.props.onActionSelected}
+                />
+              ))}
           </ol>
         </div>
       </div>
@@ -61,4 +68,4 @@ class SearchPage extends Component {
   }
 }
 
-export default SearchPage;
+export default SearchPage

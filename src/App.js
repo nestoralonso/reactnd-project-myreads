@@ -1,25 +1,25 @@
-import React from 'react'
-import { Route } from 'react-router-dom'
-import * as BooksAPI from './BooksAPI'
-import './App.css'
-import BookItem from './BookItem'
-import SearchPage from './SearchPage'
+import React from "react"
+import { Route } from "react-router-dom"
+import * as BooksAPI from "./BooksAPI"
+import "./App.css"
+import BookItem from "./BookItem"
+import SearchPage from "./SearchPage"
 
 const Shelf = {
-  CurrentlyReading: 'currentlyReading',
-  WantToRead: 'wantToRead',
-  Read: 'read',
+  CurrentlyReading: "currentlyReading",
+  WantToRead: "wantToRead",
+  Read: "read"
 }
 
 const ShelfTitle = {
-  currentlyReading: 'Currently Reading',
-  wantToRead: 'Want To Read',
-  read: 'Read',
+  currentlyReading: "Currently Reading",
+  wantToRead: "Want To Read",
+  read: "Read"
 }
 
 class BooksApp extends React.Component {
   state = {
-    books: [],
+    books: []
   }
 
   componentDidMount() {
@@ -28,27 +28,44 @@ class BooksApp extends React.Component {
 
   fetchAllBooks = async () => {
     const books = await BooksAPI.getAll()
-    console.log('books', books);
-    const book0 = books[0]
+    console.log("books", books)
+
     this.setState({
-      books,
-      book0
+      books
     })
   }
 
-  onActionSelected = (...args) => {
-    console.log('app>', ...args);
+  onActionSelected = (book, action) => {
+    console.log("app>", book, action)
+    this.setState(prevState => {
+      const { books: oldBooks } = prevState
+      const newBook = {...book, shelf: action}
+      let books = oldBooks.filter(_book => _book.id !== book.id)
+      if (action !== 'none') {
+        books = [...books, newBook]
+      }
 
+      BooksAPI.update(newBook, action)
+      return {
+        books
+      }
+    })
   }
 
   render() {
     return (
       <div className="app">
-        <Route path='/' exact render={this.renderList} />
+        <Route path="/" exact render={this.renderList} />
 
-        <Route path='/search' render={({ history }) => (
-          <SearchPage history={history} onActionSelected={this.onActionSelected} />
-        )} />
+        <Route
+          path="/search"
+          render={({ history }) => (
+            <SearchPage
+              history={history}
+              onActionSelected={this.onActionSelected}
+            />
+          )}
+        />
       </div>
     )
   }
@@ -65,10 +82,12 @@ class BooksApp extends React.Component {
           <ol className="books-grid">
             {this.getShelfBooks(shelf).map(book => (
               <li key={book.id}>
-                <BookItem data={book} onActionSelected={this.onActionSelected} />
+                <BookItem
+                  data={book}
+                  onActionSelected={this.onActionSelected}
+                />
               </li>
             ))}
-
           </ol>
         </div>
       </div>
@@ -89,7 +108,13 @@ class BooksApp extends React.Component {
           </div>
         </div>
         <div className="open-search">
-          <a onClick={() => { history.push('/search') }}>Add a book</a>
+          <a
+            onClick={() => {
+              history.push("/search")
+            }}
+          >
+            Add a book
+          </a>
         </div>
       </div>
     )
