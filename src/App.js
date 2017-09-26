@@ -19,7 +19,8 @@ const ShelfTitle = {
 
 class BooksApp extends React.Component {
   state = {
-    books: []
+    books: [],
+    shelves: {},
   }
 
   componentDidMount() {
@@ -28,31 +29,39 @@ class BooksApp extends React.Component {
 
   fetchAllBooks = async () => {
     const books = await BooksAPI.getAll()
-    console.log("books", books)
+    const shelves = {}
+    for (const book of books) {
+      shelves[book.id] = book.shelf
+    }
 
     this.setState({
-      books
+      books,
+      shelves
     })
   }
 
-  onActionSelected = (book, action) => {
-    console.log("app>", book, action)
+  onActionSelected = (book, shelfId) => {
     this.setState(prevState => {
-      const { books: oldBooks } = prevState
-      const newBook = {...book, shelf: action}
+      const { books: oldBooks, shelves } = prevState
+      const newBook = {...book, shelf: shelfId}
       let books = oldBooks.filter(_book => _book.id !== book.id)
-      if (action !== 'none') {
+      if (shelfId !== 'none') {
         books = [...books, newBook]
       }
 
-      BooksAPI.update(newBook, action)
+      BooksAPI.update(newBook, shelfId)
       return {
-        books
+        books,
+        shelves: {
+          ...shelves,
+          [book.id]: shelfId
+        }
       }
     })
   }
 
   render() {
+    const { shelves } = this.state
     return (
       <div className="app">
         <Route path="/" exact render={this.renderList} />
@@ -61,6 +70,7 @@ class BooksApp extends React.Component {
           path="/search"
           render={({ history }) => (
             <SearchPage
+              shelves={shelves}
               history={history}
               onActionSelected={this.onActionSelected}
             />
@@ -75,6 +85,7 @@ class BooksApp extends React.Component {
   }
 
   renderShelf(shelf) {
+    const { shelves } = this.state
     return (
       <div className="bookshelf">
         <h2 className="bookshelf-title">{ShelfTitle[shelf]}</h2>
@@ -84,6 +95,7 @@ class BooksApp extends React.Component {
               <li key={book.id}>
                 <BookItem
                   data={book}
+                  shelfId={shelves[book.id]}
                   onActionSelected={this.onActionSelected}
                 />
               </li>

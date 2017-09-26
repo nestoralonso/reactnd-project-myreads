@@ -3,7 +3,8 @@ import PropTypes from "prop-types"
 
 class BookItem extends Component {
   static propTypes = {
-    onActionSelected: PropTypes.func.isRequired
+    onActionSelected: PropTypes.func.isRequired,
+    shelfId: PropTypes.string.isRequired
   }
 
   getThumbnailStyle() {
@@ -16,13 +17,12 @@ class BookItem extends Component {
   }
 
   onActionSelected = e => {
-    console.log('e=', e);
     if (!e || !e.target) return
     this.props.onActionSelected(this.props.data, e.target.value)
   }
 
   render() {
-    const { data } = this.props
+    const { data, shelfId } = this.props
 
     if (!data) return null
 
@@ -31,7 +31,7 @@ class BookItem extends Component {
         <div className="book-top">
           <div className="book-cover" style={this.getThumbnailStyle()} />
           <div className="book-shelf-changer">
-            <select onChange={this.onActionSelected} value={data.shelf}>
+            <select onChange={this.onActionSelected} value={shelfId}>
               <option value="none" disabled>
                 Move to...
               </option>
