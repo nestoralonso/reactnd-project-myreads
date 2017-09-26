@@ -1,4 +1,6 @@
 import React, { Component } from "react"
+import { Link } from "react-router-dom"
+
 import debounce from "lodash.debounce"
 import * as BooksAPI from "./BooksAPI"
 import BookItem from "./BookItem"
@@ -53,6 +55,10 @@ class SearchPage extends Component {
           </div>
         </div>
         <div className="search-books-results">
+          <div>
+            <Link to="/">Back to main page</Link>
+          </div>
+
           <ol className="books-grid">
             {books &&
               Array.isArray(books) &&
@@ -66,6 +72,7 @@ class SearchPage extends Component {
               ))}
           </ol>
         </div>
+
       </div>
     )
   }
