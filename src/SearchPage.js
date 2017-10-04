@@ -13,17 +13,16 @@ class SearchPage extends Component {
 
   queryUpdated = debounce(async query => {
     try {
-      const books = await BooksAPI.search(query)
+      const response = await BooksAPI.search(query)
+      if (!response || response.error) {
+        this.setState({ books: [] })
+      }
 
-      if (!books) return
-
-      this.setState({
-        books: books.map(b => {
-          return b
-        })
-      })
+      const books = response
+      this.setState({ books })
     } catch (error) {
       console.error('Something gone wrong', error)
+      this.setState({ books: [] })
     }
   }, 180)
 
@@ -33,18 +32,24 @@ class SearchPage extends Component {
     this.queryUpdated(query)
   }
 
+  getBookShelf(bookId) {
+    const { myBooks } = this.props
+
+    return myBooks[bookId] && myBooks[bookId].shelf
+  }
+
   render() {
     const { books } = this.state
-    const { shelves } = this.props
+
     return (
       <div className="search-books">
         <div className="search-books-bar">
-          <a
+          <Link
             className="close-search"
-            onClick={() => this.props.history.push("/")}
+            to="/"
           >
             Close
-          </a>
+          </Link>
           <div className="search-books-input-wrapper">
             <input
               type="text"
@@ -66,7 +71,7 @@ class SearchPage extends Component {
                 <BookItem
                   key={book.id}
                   data={book}
-                  shelfId={shelves[book.id] || 'none'}
+                  shelfId={this.getBookShelf(book.id) || 'none'}
                   onActionSelected={this.props.onActionSelected}
                 />
               ))}
