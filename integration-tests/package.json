@@ -6,6 +6,7 @@
   "scripts": {
     "selenium": "selenium-standalone start",
     "selenium:install": "selenium-standalone install",
+    "e2e-test": "wdio",
     "clean": "read -p \"Are you sure you want to clean the project? [y/n] \" REPLY; if [[ $REPLY =~ ^[Yy]$ ]]; then rm -R .git .github demo-app test .codeclimate.yml .travis.yml jest.json wdio.BUILD.conf.js src/features/**; fi",
     "local-webserver": "forever start -s ./node_modules/.bin/http-server ./demo-app -s",
     "test": "npm run test:validate && npm run test:unit && npm run test:features",

@@ -19,8 +19,7 @@ const ShelfTitle = {
 
 class BooksApp extends React.Component {
   state = {
-    books: [],
-    shelves: {},
+    books: {},
   }
 
   componentDidMount() {
@@ -28,40 +27,35 @@ class BooksApp extends React.Component {
   }
 
   fetchAllBooks = async () => {
-    const books = await BooksAPI.getAll()
-    const shelves = {}
-    for (const book of books) {
-      shelves[book.id] = book.shelf
+    const booksArray = await BooksAPI.getAll()
+    const books = {}
+    for (const book of booksArray) {
+      books[book.id] = book
     }
 
     this.setState({
       books,
-      shelves
     })
   }
 
   onActionSelected = (book, shelfId) => {
     this.setState(prevState => {
-      const { books: oldBooks, shelves } = prevState
+      const { books: oldBooks } = prevState
       const newBook = {...book, shelf: shelfId}
-      let books = oldBooks.filter(_book => _book.id !== book.id)
+      let { [book.id]: targetBook, ...restBooks } = oldBooks
       if (shelfId !== 'none') {
-        books = [...books, newBook]
+        restBooks[book.id] = newBook
       }
 
       BooksAPI.update(newBook, shelfId)
       return {
-        books,
-        shelves: {
-          ...shelves,
-          [book.id]: shelfId
-        }
+        books: restBooks,
       }
     })
   }
 
   render() {
-    const { shelves } = this.state
+    const { books } = this.state
     return (
       <div className="app">
         <Route path="/" exact render={this.renderList} />
@@ -70,7 +64,7 @@ class BooksApp extends React.Component {
           path="/search"
           render={({ history }) => (
             <SearchPage
-              shelves={shelves}
+              myBooks={books}
               history={history}
               onActionSelected={this.onActionSelected}
             />
@@ -81,11 +75,14 @@ class BooksApp extends React.Component {
   }
 
   getShelfBooks(shelf) {
-    return this.state.books.filter(book => book.shelf === shelf)
+    const { books } = this.state
+    return Object.keys(books)
+              .map(bookId => books[bookId])
+              .filter(book => book.shelf === shelf)
   }
 
   renderShelf(shelf) {
-    const { shelves } = this.state
+    const { books } = this.state
     return (
       <div className="bookshelf">
         <h2 className="bookshelf-title">{ShelfTitle[shelf]}</h2>
@@ -95,7 +92,7 @@ class BooksApp extends React.Component {
               <li key={book.id}>
                 <BookItem
                   data={book}
-                  shelfId={shelves[book.id]}
+                  shelfId={books[book.id].shelf}
                   onActionSelected={this.onActionSelected}
                 />
               </li>
